@@ -1,25 +1,9 @@
-#!/bin/perl
+#!/usr/bin/perl -I/scripts/perl_modules
+# convention is to install linux_goodness/scripts to the root folder.
 
-# should be at same directory as this script.
-my $path_to_scripts_directory = `pwd`;
-my $last_char = substr($path_to_scripts_directory, -1);
-if ($last_char eq "\n") {
-    $path_to_scripts_directory = substr($path_to_scripts_directory, 0, length($path_to_scripts_directory) - 1);
-}
-if ($last_char eq "/") {
-    $path_to_scripts_directory = substr($path_to_scripts_directory, 0, length($path_to_scripts_directory) - 1);
-}
-if ($0 =~ /(\.)?(.*)?\/install.pl/) {
-    if ($1 eq ".") {
-        # if relative path
-        $path_to_scripts_directory .= $2;
-    } else {
-        # if absolute path
-        $path_to_scripts_directory = $2;
-    }
-} else {
-    exit(1);
-}
+use File;
+
+my $path_to_scripts_directory = File::pathToContainingFolder(); # to work if located anywhere other than /scripts
 
 my $HOME = `echo -n \$HOME`;
 my $SHELL_RC = "$HOME/.bashrc";
