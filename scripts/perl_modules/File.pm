@@ -3,135 +3,68 @@ package File;
 use strict;
 use warnings;
 
-# TODO: module that implements a function that takes a file path and generates a backup... with history
-
-# can I do something similar for defining the arguments and remove addProcessors??
-# why is this even a thing?
-use constant {
-	SUB_KEY => "sub",
-	USAGE_KEY => "usage",
-	VALUE_KEY => "value",
-
-	HELP_ARG_KEY => "--help",
-	VERSION_ARG_KEY => "--version",
-};
-
-# Processors DataStructure
-# {
-#	key: {
-#		sub: ,
-#		usage: , 
-#		required?:,
-#		format/regex/range?, should I leave up to implementer to implement in processor subroutines? What level of abstraction am I looking for here?
-#		full_name? too much?: move up and hash reference to another key and do automagically?
-#	}, ...
-#
-#	i.e. 
-#	"-v" : {
-#		sub: process_v(),
-#		usage: "Description",
-#
-#	}
-# }
-#
-# ARGH DataStructure
-# {
-#	key: value,
-#	...
-# }
-
-my %PROCESSORS = {
-	HELP_ARG_KEY => {
-		SUB_KEY => &printUsage,
-		USAGE_KEY => "Prints application usage."
-	},
-	VERSION_ARG_KEY => {
-		SUB_KEY => &printVersion,
-		USAGE_KEY => "Prints application version."
+sub pwd {
+	my $pwd = `pwd`;
+	my $last_char = substr($pwd, -1);
+	if ($last_char eq "\n") {
+	    $pwd = substr($pwd, 0, length($pwd) - 1);
 	}
-};
-
-my %ARGH = {};
-
-sub printVersion {
-	print("$::VERSION\n");
-	exit;
+	if ($last_char eq "/") {
+	    $pwd = substr($pwd, 0, length($pwd) - 1);
+	}
+	return $pwd;
 }
 
-sub printUsage {
-	my $usage = "";
-	foreach (keys %PROCESSORS) {
-		my %processor = $PROCESSORS{$_};
-		$usage .= "\t$_\t\t\t\t$processor{USAGE_KEY}\n";
-	}
-	$usage .= "\n";
-	print($usage);
-	exit;
-}
-
-sub parse {
-	my $prev_key = "";
-	%ARGH = {};
-	if (::DEBUG) {
-		print("PARSING\n");
-	}
-	# O1+n
-	for (my $i = 0; $i < scalar(@ARGV); $i++) {
-		if ($ARGV[$i] =~ /-(.+)/) {
-			$prev_key = $ARGV[$i];
-			$ARGH{$prev_key} = 1;
-		} elsif ($prev_key eq "$ARGV[$i - 1]") {
-			# if start of key_value
-			$ARGH{$prev_key} = "$ARGV[$i]";
-		} else {
-			# support (unquoted?) spaces in key_value pairs
-			$ARGH{$prev_key} .= " $ARGV[$i]";
+sub pathToContainingFolder {
+	# remember $0 is first token of CLI string, so may be relative to pwd or absolute...
+	# system launches a shell which can open anywhere... lmao so yeah convert to absolute.
+	my $abs_path_to_containing_folder = $0; # assume absolute
+	my $first_char = substr($0, 0, 1);
+	if ($first_char ne "/") {
+	    # if relative path
+		my @SPLIT_PATH = split($0, "/");
+		# hmm... how does this compare to substr? In the past, I expect the difference to be negligable
+		my $i = 0;
+		my $last_slash_index = 0;
+		foreach(split(//, $0)) {
+			if ($_ eq "/") {
+				$last_slash_index = $i;
+			}
+			$i++;
 		}
-	}
-	if (::DEBUG) {
-		print("PARSING COMPLETE\n");
-	}
-	if ($ARGH{HELP_ARG_KEY}) {
-		processArg(HELP_ARG_KEY);
-	} elsif ($ARGH{VERSION_ARG_KEY}) {
-		processArg(VERSION_ARG_KEY);
-	}
-}
-
-sub addProcessors {
-	# think about this somemore
-	if (::DEBUG) {
-		print("Added Processors \n");
-	}
-	my ($hashref) = @_;
-
-	my %new_processors = %{$hashref};
-	foreach (keys %PROCESSORS) {
-		$PROCESSORS{$_} = $new_processors{$_};
-	}
-}
-
-sub removeProcessors {
-	foreach (@_) {
-		delete $PROCESSORS{$_};
-	}
-}
-
-sub processArg {
-	my ($key) = @_;
-	$PROCESSORS{$key}->($ARGH{$key});
-}
-
-sub processAll {
-	foreach (keys %ARGH) {
-		# These are processed in the parse function - they are prioritized over other args and cause the program to exit.
-		#	Priority:
-		#		- HELP
-		#		- VERSION
-		#		- OTHERS in "random" order? because key(set)? If need specific order, call processArg individually?
-		if ($_ ne HELP_ARG_KEY && $_ ne VERSION_ARG_KEY) { 
-			processArg($_);
+		# the filesystem ensures either starts like ./script.pl or ./folder/script.pl" or folder/script.pl
+		# 	remember index will give me string up to slash which is perfect.
+		my $relative = substr($0, 0, $last_slash_index); # folder/script.pl
+		if ($first_char eq ".") {
+			if ($last_slash_index > 2) { # ./folder/script.pl -> folder/script.pl
+				$relative = substr($0, 2, $last_slash_index - 2);
+			} else { # ./script.pl
+				$relative = "";
+			}
 		}
+	    $abs_path_to_containing_folder = pwd().$relative;
+	}
+	return $abs_path_to_containing_folder;
+}
+
+# current
+#	current.bak.0
+#	current.bak.1
+#	current.bak.2
+
+# on invocation
+# 	current -> current.bak.3
+sub generateBackup {
+	my ($file_path) = @_;
+
+	my $num_files = scalar(split(/ /, `ls $file_path*`)); # not an issue if this matches more because timestamps
+	if ($num_files == 0) {
+		# TODO: review module context stuff... wrt special variables, variables defined here, etc.
+		#	update perl_perling
+		print("File specified to generate backup does not exist:\n$file_path");
+	} else {
+		my $new_designator = $num_files - 1;
+		system("cp $file_path $file_path.bak.$new_designator");
 	}
 }
 

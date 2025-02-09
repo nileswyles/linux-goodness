@@ -1,0 +1,37 @@
+#!/bin/perl -I./
+
+use strict;
+use warnings;
+
+use constant {
+	DEBUG => 1,
+};
+
+use Test;
+use File;
+
+# probably the only use-case for this? lmao
+# output record separator
+$\ = "\n";
+
+my $path = File::pathToContainingFolder();
+print("Path containing folder: $path");
+
+my $out_folder = Test::MakeOutFolder($path);
+
+my $test_file = "$out_folder/test_file_for_backup";
+system("echo \"test\" > $test_file");
+File::generateBackup($test_file);
+
+my $actual_files = `ls $test_file*`;
+my $expected_files = "$out_folder/test_file_for_backup\n$out_folder/test_file_for_backup.bak.0\n";
+print("Expected Files:");
+print($expected_files);
+print("Actual Files:");
+print($actual_files);
+
+if ($expected_files eq $actual_files) {
+	print("Passed!");
+} else {
+	print("Failed!");
+}
