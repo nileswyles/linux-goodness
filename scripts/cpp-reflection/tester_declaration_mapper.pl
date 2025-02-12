@@ -42,7 +42,7 @@ while (<$fh>) {
             if ($TEST_NAME eq "") {
                 print("$1, $PATH_TO_FILE:$line_number\n");
             } elsif ($TEST_NAME eq $1) {
-                print("$PATH_TO_FILE:$line_number\n");
+                print("$PATH_TO_FILE:$line_number");
             }
         }
     }
