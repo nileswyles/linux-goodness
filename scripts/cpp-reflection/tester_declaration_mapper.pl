@@ -14,17 +14,6 @@ if ($PATH_TO_FILE eq "") {
     exit(1);
 }
 open(my $fh, "<", $PATH_TO_FILE);
-if (substr($PATH_TO_FILE, 0, 1) ne "/") {
-    my $pwd = `pwd`;
-    my $last_char = substr($pwd, -1, 1);
-    if ($last_char eq "\n") {
-        $pwd = substr($pwd, 0, length($pwd) - 1);
-    }
-    if ($last_char eq "/") {
-        $pwd = substr($pwd, 0, length($pwd) - 1);
-    }
-    $PATH_TO_FILE = "$pwd/$PATH_TO_FILE";
-}
 if ($TEST_NAME eq "") {
     print("Generating test declaration-line_number map for:\n$PATH_TO_FILE\n\n");
 }
