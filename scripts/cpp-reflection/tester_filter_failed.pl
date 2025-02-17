@@ -18,7 +18,7 @@ sub printTestSuite {
 }
 
 while (<STDIN>) {
-    if ($_ =~ /Test Func: (.*) -> (.*)/) {
+    if ($_ =~ /Test Func: (.*)/) {
         # new test
         $buffer = "\n#######################################\n\n";
         $buffer .= "$_";
