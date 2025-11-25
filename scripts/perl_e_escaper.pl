@@ -7,8 +7,7 @@ open($in_fh, "<", $in);
 seek($in_fh, 0, 0);
 
 my $c;
-while(1) {
-	read($in_fh, $c, 1);
+while(my $bytes_read = read($in_fh, $c, 1)) {
 	if (
 		$c eq "\$" ||
 		$c eq "\\" ||
