@@ -37,3 +37,4 @@ while (<$fh>) {
     }
     $line_number++;
 }
+close($fh);

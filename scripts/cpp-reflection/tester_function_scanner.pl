@@ -24,6 +24,7 @@ while (<$fh>) {
         }
     }
 }
+close($fh);
 print("\n\n");
 print("Test function declarations: \n");
 open(my $fh, "<", $PATH_TO_FILE);
@@ -37,3 +38,4 @@ while (<$fh>) {
         }
     }
 }
+close($fh);
