@@ -1,6 +1,6 @@
 ## Installation Instructions
 
-1. Install Linux Distro (i.e. Arch Linux, Ubuntu, Debian)
+1. Install Linux Distro (i.e. Arch Linux, Ubuntu, Debian, Fedora)
 1. Create user...
 2. Restore linux_goodness (Xresources, etc.)
 3. Config Display Manager
