@@ -7,7 +7,7 @@
 	- gdm/gnome_shell/nautilus/gnome-control-center/networkmanager?,etc... (suspend/resume works out of the box (twss, lol)?)
 or 
 	- lightdm/i3/i3lock/suspend/resume (PM/ACPI - upowerd)
-4. Config AppArmor or SELinux to isolate cookies and workspace folders (only select applications can access those files)
+4. Config AppArmor, SELinux or cleverly configure the Display Manager and launch applications from individual users to isolate cookies and workspace folders (only select applications can access those files)
 	- cookies == edge and git
 	- software_workspace == vscode, vim (xterm?)
 	- hardware_workspace == kicad
